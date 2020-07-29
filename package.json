@@ -1,0 +1,17 @@
+{
+  "name": "app-node-monitoramento",
+  "version": "1.0.0",
+  "description": "Aplicação simples em NodeJs para testar a implementação do Prometheus.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "monitoramento"
+  ],
+  "author": "Antonia Luciana Pires",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
