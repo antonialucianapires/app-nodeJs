@@ -16,6 +16,12 @@ const gauge = new prom.Gauge({
     help: 'contador de request',
     labelNames:['statusCode']
 })
+//histogram
+const histogram = new prom.Histogram({
+    name: 'app_request_time_seconds',
+    help: 'tempo de resposta da api',
+    buckets: [0.1, 0.2, 0.3, 0.4, 0.5],
+  });
 
 app.get('/', (req, res) => {
 
@@ -24,6 +30,9 @@ app.get('/', (req, res) => {
 
     //gauge
     gauge.set(100 * Math.random());
+
+    //histogram
+    histogram.observe(Math.random());
     
     return res.send('Hello, JS!')
 })
