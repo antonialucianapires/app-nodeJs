@@ -14,7 +14,6 @@ const counter = new promClient.Counter({
 const gauge = new promClient.Gauge({
     name: 'app_free_bytes',
     help: 'contador de request',
-    labelNames:['statusCode']
 });
 
 //histogram
