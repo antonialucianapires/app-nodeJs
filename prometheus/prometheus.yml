@@ -11,8 +11,8 @@ scrape_configs:
   - targets:
     - localhost:9090
 
-    
+
 - job_name: app-node
   static_configs:
   - targets:
-    - 192.168.0.12:3001
+    - ${ip}:3001
