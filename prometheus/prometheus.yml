@@ -15,4 +15,4 @@ scrape_configs:
 - job_name: app-node
   static_configs:
   - targets:
-    - ${ip}:3001
+    - ${ip}:3030

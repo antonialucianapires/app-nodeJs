@@ -3,55 +3,71 @@ const promClient = require('prom-client');
 const register = promClient.register;
 const app = express();
 
-//contador
-const counter = new promClient.Counter({
+const contadorRequisicoes = new promClient.Counter({
   name: 'app_request_total',
   help: 'contador de request',
   labelNames:['statusCode']
 });
 
-//gauge
-const gauge = new promClient.Gauge({
-    name: 'app_free_bytes',
-    help: 'contador de request',
+const usuariosOnline = new promClient.Gauge({
+  name: 'aula_usuarios_logados_total',
+	help: 'Número de usuários logados no momento'
 });
 
-//histogram
-const histogram = new promClient.Histogram({
-    name: 'app_request_time_seconds',
-    help: 'tempo de resposta da api',
-    buckets: [0.1, 0.2, 0.3, 0.4, 0.5],
+const tempoDeResposta = new promClient.Histogram({
+  name: 'app_request_duration_seconds',
+	help: 'Tempo de resposta da API'
   });
 
-//summary
-const summary = new promClient.Summary({
-    name: 'app_summary_request_time_seconds',
-    help: 'tempo de resposta da api',
-    percentiles: [0.5, 0.9, 0.99],
+  var zeraUsuariosLogados = false;
+
+  function randn_bm(min, max, skew) {
+    var u = 0, v = 0;
+    while (u === 0) u = Math.random(); //Converting [0,1) to (0,1)
+    while (v === 0) v = Math.random();
+    let num = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+  
+    num = num / 10.0 + 0.5; // Translate to 0 -> 1
+    if (num > 1 || num < 0) num = randn_bm(min, max, skew); // resample between 0 and 1 if out of range
+    num = Math.pow(num, skew); // Skew
+    num *= max - min; // Stretch to fill range
+    num += min; // offset to min
+    return num;
+  }
+
+  setInterval(() => {
+    // Incrementa contador de requisições
+    var taxaDeErro = 5;
+    var statusCode = (Math.random() < taxaDeErro/100) ? '500' : '200';
+    contadorRequisicoes.labels(statusCode).inc();
+  
+    // Atualiza gauge de usuários logados
+    var usuariosLogados = (zeraUsuariosLogados) ? 0 : 500 + Math.round((50 * Math.random()))
+    usuariosOnline.set(usuariosLogados);
+  
+    // Observa tempo de resposta
+    var tempoObservado = randn_bm(0, 3, 4);
+    tempoDeResposta.observe(tempoObservado);
+  }, 150);
+
+  app.get('/', function (req, res) {
+    res.send('Hello World!');
   });
-
-app.get('/', (req, res) => {
-
-    const tempo =Math.random();
-
-    //contador
-    counter.labels('200').inc();
-
-    //gauge
-    gauge.set(100 * Math.random());
-
-    //histogram
-    histogram.observe(tempo);
-
-    //summary
-    summary.observe(tempo);
-    
-    return res.send('Hello, JS!')
-})
-
-app.get('/metrics', (req, res) => {
+  
+  app.get('/zera-usuarios-logados', function (req, res) {
+    zeraUsuariosLogados = true;
+    res.send('OK');
+  });
+  
+  app.get('/retorna-usuarios-logados', function (req, res) {
+    zeraUsuariosLogados = false;
+    res.send('OK');
+  });
+  
+  app.get('/metrics', function(req, res) {
     res.set('Content-Type', register.contentType);
-    res.send(register.metrics());
-})
+    res.end(register.metrics());
+  })
+  
 
-app.listen(3001);
+app.listen(3030);
